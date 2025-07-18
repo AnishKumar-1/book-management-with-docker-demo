@@ -1,0 +1,54 @@
+services:
+
+  mysql:
+    image: mysql:8.0
+    container_name: mysql-container
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: authordb
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+    networks:
+      - spring-net
+
+  eureka-service:
+    image: eureka-image
+    container_name: eureka-container
+    ports:
+      - "8761:8761"
+    networks:
+      - spring-net
+
+  author-service:
+    build:
+      context: ./author-management
+    image: author-image
+    container_name: author-container
+    ports:
+      - "8081:8081"
+    networks:
+      - spring-net
+    depends_on:
+      - eureka-service
+      - mysql
+
+  book-service:
+    image: book-image
+    container_name: book-container
+    ports:
+      - "8082:8082"
+    networks:
+      - spring-net
+    depends_on:
+      - eureka-service
+      - mysql
+
+networks:
+  spring-net:
+    external: true
+
+
+volumes:
+  mysql-data:
